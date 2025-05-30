@@ -5,11 +5,12 @@ export default function CustomerDashboard({ actor, logout, principal, fetchTicke
   const [tokenInitialized, setTokenInitialized] = useState(false);
   
   useEffect(() => {
-    checkTokenInitialization();
-    if (tokenInitialized) {
+    // checkTokenInitialization();
+    // setTokenInitialized(true);
+    // if (tokenInitialized) {
       fetchTickets();
       fetchCustomerBalance();
-    }
+    // }
   }, [principal, tokenInitialized]);
 
   const checkTokenInitialization = async () => {
@@ -48,7 +49,7 @@ export default function CustomerDashboard({ actor, logout, principal, fetchTicke
           Logout
         </button>
       </div>
-      {!tokenInitialized ? (
+      {tokenInitialized ? (
         <div>
           <h2 className="text-2xl font-bold mb-6 text-gray-800">Token Not Initialized</h2>
           <p className="text-gray-600">The token has not been initialized yet. Please wait for an Organizer to initialize the token.</p>
@@ -86,10 +87,10 @@ export default function CustomerDashboard({ actor, logout, principal, fetchTicke
                       <p className="text-gray-600 text-sm"><span className="font-medium">Date:</span> {concertDate ? concertDate.toLocaleDateString() : "N/A"}</p>
                       <p className="text-gray-600 text-sm"><span className="font-medium">Status:</span> <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${ticket.isValid ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{statusText}</span></p>
                     </div>
-                    <button onClick={() => viewNFT(ticket.id)} className="mt-4 flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-purple-500 text-white hover:bg-purple-600 transition-all duration-200">
+                    {/* <button onClick={() => viewNFT(ticket.id)} className="mt-4 flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-purple-500 text-white hover:bg-purple-600 transition-all duration-200">
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                       View NFT
-                    </button>
+                    </button> */}
                   </div>
                 );
               })}

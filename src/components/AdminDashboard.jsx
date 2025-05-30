@@ -19,10 +19,10 @@ export default function AdminDashboard({ actor, logout, principal }) {
         checkRole();
         checkTokenInitialization();
         fetchAdminBalance();
-        if (tokenInitialized) {
-            fetchTokenSettings();
-            fetchAllUsers();
-        }
+        // if (tokenInitialized) {
+        fetchTokenSettings();
+        fetchAllUsers();
+        // }
     }, [principal, tokenInitialized]);
 
     const checkTokenInitialization = async () => {
@@ -48,74 +48,113 @@ export default function AdminDashboard({ actor, logout, principal }) {
     };
 
     const fetchTokenSettings = async () => {
-        try {
-            const settings = await actor.getTokenSettings();
-            const tokenSettings = Array.isArray(settings) && settings.length > 0 ? settings[0] : null;
-            if (tokenSettings) {
-                setTokenSettings({
-                    token_name: tokenSettings.token_name || "Not Set",
-                    token_symbol: tokenSettings.token_symbol || "Not Set",
-                    decimals: Number(tokenSettings.decimals) || 0,
-                    transfer_fee: Number(tokenSettings.transfer_fee) / 100_000_000 || 0,
-                    logo: tokenSettings.logo || "Not Set",
-                    total_supply: Number(tokenSettings.total_supply) / 100_000_000 || 0,
-                });
-            } else {
-                console.error("Token settings returned null or empty array. Caller might not be an admin or token not initialized.");
-                setTokenSettings({ token_name: "Not Available", token_symbol: "Not Available", decimals: 0, transfer_fee: 0, logo: "Not Available", total_supply: 0 });
-            }
-        } catch (error) {
-            console.error("Failed to fetch token settings:", error);
-            setTokenSettings({ token_name: "Error", token_symbol: "Error", decimals: 0, transfer_fee: 0, logo: "Error", total_supply: 0 });
-        }
+        setTokenSettings({
+          token_name: "Medley",
+          token_symbol: "MDL",
+          decimals: 1,
+          transfer_fee: 0.2,
+          logo: "https://res.cloudinary.com/dqvlnzw9f/image/upload/f_auto,q_auto/v1/Medley/ci3v3mkgpkhxjjfr7akc",
+          total_supply: 30000,
+        });
+        // try {
+        //     const settings = await actor.getTokenSettings();
+        //     const tokenSettings = Array.isArray(settings) && settings.length > 0 ? settings[0] : null;
+        //     if (tokenSettings) {
+        //         setTokenSettings({
+        //             token_name: tokenSettings.token_name || "Medley",
+        //             token_symbol: tokenSettings.token_symbol || "MDL",
+        //             decimals: Number(tokenSettings.decimals) || 10,
+        //             transfer_fee: Number(tokenSettings.transfer_fee) / 100_000_000 || 0.2,
+        //             logo: tokenSettings.logo || "Not Set",
+        //             total_supply: Number(tokenSettings.total_supply) / 100_000_000 || 30000,
+        //         });
+        //     } else {
+        //         console.error("Token settings returned null or empty array. Caller might not be an admin or token not initialized.");
+        //         setTokenSettings({ token_name: "Not Available", token_symbol: "Not Available", decimals: 0, transfer_fee: 0, logo: "Not Available", total_supply: 0 });
+        //     }
+        // } catch (error) {
+        //     console.error("Failed to fetch token settings:", error);
+        //     setTokenSettings({ token_name: "Error", token_symbol: "Error", decimals: 0, transfer_fee: 0, logo: "Error", total_supply: 0 });
+        // }
     };
 
+    const dummyUser = [
+      {
+        name: "Valdo",
+        role: "Organizer",
+        balance: 50,
+      },
+      {
+        name: "David",
+        role: "Customer",
+        balance: 10,
+      },
+      {
+        name: "Christo",
+        role: "Organizer",
+        balance: 5,
+      },
+      {
+        name: "Ricky",
+        role: "Customer",
+        balance: 13,
+      },
+      {
+        name: "Steven",
+        role: "Customer",
+        balance: 0,
+      },
+    ];
+
     const fetchAllUsers = async () => {
-        try {
-            setUsers([]);
-            const userList = await actor.getAllUsers();
-            if (userList) {
-                const tuples = Array.isArray(userList[0]) && Array.isArray(userList[0][0]) ? userList[0] : userList;
-                const mappedUsers = tuples.map((userTuple, index) => {
-                    if (!Array.isArray(userTuple) || userTuple.length !== 3) {
-                        console.error(`Invalid user tuple at index ${index}:`, userTuple);
-                        return { role: "Unknown", name: "Unknown", balance: 0 };
-                    }
-                    const [role, name, balance] = userTuple;
-                    return { role, name, balance: Number(balance) / 100_000_000 || 0 };
-                });
-                setUsers(mappedUsers);
-            } else {
-                console.error("User list returned null. Caller might not be an admin.");
-                setUsers([]);
-            }
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-            setUsers([]);
-        }
+        setUsers(dummyUser);
+        // try {
+        //     setUsers([]);
+        //     const userList = await actor.getAllUsers();
+        //     if (userList) {
+        //         const tuples = Array.isArray(userList[0]) && Array.isArray(userList[0][0]) ? userList[0] : userList;
+        //         const mappedUsers = tuples.map((userTuple, index) => {
+        //             if (!Array.isArray(userTuple) || userTuple.length !== 3) {
+        //                 console.error(`Invalid user tuple at index ${index}:`, userTuple);
+        //                 return { role: "Unknown", name: "Unknown", balance: 0 };
+        //             }
+        //             const [role, name, balance] = userTuple;
+        //             return { role, name, balance: Number(balance) / 100_000_000 || 0 };
+        //         });
+        //         setUsers(mappedUsers);
+        //     } else {
+        //         console.error("User list returned null. Caller might not be an admin.");
+        //         setUsers([]);
+        //     }
+        // } catch (error) {
+        //     console.error("Failed to fetch users:", error);
+        //     setUsers([]);
+        // }
     };
 
     const handleInitializeToken = async (e) => {
-        e.preventDefault();
-        try {
-            const result = await actor.initializeToken({
-                token_name: tokenName,
-                token_symbol: tokenSymbol,
-                initial_supply: BigInt(Math.round(Number(initialSupply) * 100_000_000)),
-                token_logo: tokenLogo,
-            });
-            if ("Ok" in result) {
-                alert(result.Ok);
-                setTokenInitialized(true);
-                fetchTokenSettings();
-                fetchAllUsers();
-            } else {
-                alert(result.Err);
-            }
-        } catch (error) {
-            console.error("Failed to initialize token:", error);
-            alert("Failed to initialize token.");
-        }
+        setTokenInitialized(true);
+        fetchTokenSettings();
+        // e.preventDefault();
+        // try {
+        //     const result = await actor.initializeToken({
+        //         token_name: tokenName,
+        //         token_symbol: tokenSymbol,
+        //         initial_supply: BigInt(Math.round(Number(initialSupply) * 100_000_000)),
+        //         token_logo: tokenLogo,
+        //     });
+        //     if ("Ok" in result) {
+        //         alert(result.Ok);
+        //         setTokenInitialized(true);
+        //         fetchTokenSettings();
+        //         fetchAllUsers();
+        //     } else {
+        //         alert(result.Err);
+        //     }
+        // } catch (error) {
+        //     console.error("Failed to initialize token:", error);
+        //     alert("Failed to initialize token.");
+        // }
     };
 
     const handleTransfer = async (e) => {
@@ -152,7 +191,7 @@ export default function AdminDashboard({ actor, logout, principal }) {
                     Logout
                 </button>
             </div>
-            {!tokenInitialized ? (
+            {tokenInitialized ? (
                 <div className="mb-6 bg-white p-4 rounded-xl shadow-md">
                     <h2 className="text-xl font-semibold text-gray-800 mb-4">Initialize Token</h2>
                     <form onSubmit={handleInitializeToken} className="space-y-4">
@@ -193,7 +232,7 @@ export default function AdminDashboard({ actor, logout, principal }) {
                                 <p className="text-gray-600"><span className="font-medium">Decimals:</span> {tokenSettings.decimals}</p>
                                 <p className="text-gray-600"><span className="font-medium">Transfer Fee:</span> {tokenSettings.transfer_fee.toFixed(8)}</p>
                                 <p className="text-gray-600"><span className="font-medium">Total Supply:</span> {tokenSettings.total_supply.toFixed(2)}</p>
-                                <p className="text-gray-600"><span className="font-medium">Logo:</span> <a href={tokenSettings.logo} target="_blank" className="text-blue-500 hover:underline">{tokenSettings.logo}</a></p>
+                                {/* <p className="text-gray-600"><span className="font-medium">Logo:</span> <a href={tokenSettings.logo} target="_blank" className="text-blue-500 hover:underline">{tokenSettings.logo}</a></p> */}
                             </div>
                         ) : (
                             <p className="text-gray-500">Loading token settings...</p>

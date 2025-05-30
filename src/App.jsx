@@ -25,15 +25,103 @@ function App() {
   const [tickets, setTickets] = useState([]);
   const [ticketConcerts, setTicketConcerts] = useState([]);
   const [balance, setBalance] = useState(0);
+  
+  const dummyTickets = [
+    {
+      id: "nft-001",
+      concertId: 1,
+      isValid: true,
+    },
+    {
+      id: "nft-002",
+      concertId: 2,
+      isValid: false,
+    },
+    {
+      id: "nft-003",
+      concertId: 3,
+      isValid: true,
+    },
+    {
+      id: "nft-004",
+      concertId: 4,
+      isValid: false,
+    },
+    {
+      id: "nft-005",
+      concertId: 5,
+      isValid: true,
+    },
+  ];
+
+  const dummyConcerts = [
+    {
+      id: 1,
+      name: "Electric Summer Fest",
+      date: (
+        new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).getTime() * 1000000
+      ).toString(),
+      organizerId: 1,
+      price: 5,
+      soldTickets: 30,
+      totalTickets: 200,
+    },
+    {
+      id: 2,
+      name: "Jazz Night Live",
+      date: (
+        new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).getTime() * 1000000
+      ).toString(),
+      organizerId: 2,
+      price: 7,
+      soldTickets: 120,
+      totalTickets: 150,
+    },
+    {
+      id: 3,
+      name: "Pop & Rock Carnival",
+      date: (
+        new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).getTime() * 1000000
+      ).toString(),
+      organizerId: 3,
+      price: 2,
+      soldTickets: 90,
+      totalTickets: 100,
+    },
+    {
+      id: 4,
+      name: "Classical Evening Gala",
+      date: (
+        new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).getTime() * 1000000
+      ).toString(),
+      organizerId: 2,
+      price: 4,
+      soldTickets: 60,
+      totalTickets: 300,
+    },
+    {
+      id: 5,
+      name: "Indie Vibes Showcase",
+      date: (
+        new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).getTime() * 1000000
+      ).toString(),
+      organizerId: 3,
+      price: 3,
+      soldTickets: 10,
+      totalTickets: 230,
+    },
+  ];
+
+
 
   useEffect(() => {
-    initializeAuth();
+    // initializeAuth();
   }, []);
 
   useEffect(() => {
     if (isAuthenticated && role) {
-      checkTokenInitialization();
-      if (tokenInitialized) fetchConcerts();
+      // checkTokenInitialization();
+       fetchConcerts();
     }
   }, [
     isAuthenticated,
@@ -141,70 +229,94 @@ function App() {
   }
 
   async function fetchConcerts() {
-    setIsLoading(true);
-    try {
-      const searchArg = search.trim() || "";
-      const minPriceArg = minPrice ? parseInt(minPrice) : 0;
-      const maxPriceArg = maxPrice ? parseInt(maxPrice) : 0;
-      const concertsList = await actor.getConcerts(
-        searchArg,
-        minPriceArg,
-        maxPriceArg,
-        onlyAvailable
-      );
-      setConcerts(concertsList);
-    } catch (error) {
-      console.error("Failed to fetch concerts:", error);
-      setConcerts([]);
-    } finally {
-      setIsLoading(false);
-    }
+    setConcerts(dummyConcerts);
+    // setIsLoading(true);
+    // try {
+    //   const searchArg = search.trim() || "";
+    //   const minPriceArg = minPrice ? parseInt(minPrice) : 0;
+    //   const maxPriceArg = maxPrice ? parseInt(maxPrice) : 0;
+    //   const concertsList = await actor.getConcerts(
+    //     searchArg,
+    //     minPriceArg,
+    //     maxPriceArg,
+    //     onlyAvailable
+    //   );
+    //   setConcerts(concertsList);
+    // } catch (error) {
+    //   console.error("Failed to fetch concerts:", error);
+    //   setConcerts([]);
+    // } finally {
+    //   setIsLoading(false);
+    // }
   }
 
   async function handleBuyTicket(concertId) {
-    try {
-      const ticketId = await actor.buyTicket(concertId);
-      alert(`${ticketId}`);
-      fetchConcerts();
-      await fetchTickets();
-      await fetchCustomerBalance();
-    } catch (error) {
-      alert(`Failed to buy ticket: ${error.message}`);
-    }
+    dummyTickets.push({
+      id: dummyTickets.length + 1,
+      concertId: concertId,
+      isValid: true,
+    })
+    setTickets([...dummyTickets]);
+    const mappedConcerts = dummyTickets.map((ticket) => {
+      return (
+        dummyConcerts.find((concert) => concert.id === ticket.concertId) || null
+      );
+    });
+    setTicketConcerts(mappedConcerts);
+    // try {
+    //   const ticketId = await actor.buyTicket(concertId);
+    //   alert(`${ticketId}`);
+    //   fetchConcerts();
+    //   await fetchTickets();
+    //   await fetchCustomerBalance();
+    // } catch (error) {
+    //   alert(`Failed to buy ticket: ${error.message}`);
+    // }
   }
 
   const fetchTickets = async () => {
-    try {
-      if (!principal) return;
-      const userTickets = await actor.getCustomerTickets(principal);
-      setTickets(userTickets);
+    setTickets(dummyTickets);
 
-      const concertPromises = userTickets.map(async (ticket) => {
-        const [concert, found] = await actor.getConcert(ticket.concertId);
-        return found ? concert : null;
-      });
+    const mappedConcerts = dummyTickets.map((ticket) => {
+      return (
+        dummyConcerts.find((concert) => concert.id === ticket.concertId) || null
+      );
+    });
 
-      const concertResults = await Promise.all(concertPromises);
-      setTicketConcerts(concertResults.filter((c) => c !== null));
-    } catch (err) {
-      console.error("Error fetching tickets:", err);
-      setTickets([]);
-      setTicketConcerts([]);
-    }
+    setTicketConcerts(mappedConcerts);
+    
+    // try {
+    //   if (!principal) return;
+    //   const userTickets = await actor.getCustomerTickets(principal);
+    //   setTickets(userTickets);
+
+    //   const concertPromises = userTickets.map(async (ticket) => {
+    //     const [concert, found] = await actor.getConcert(ticket.concertId);
+    //     return found ? concert : null;
+    //   });
+
+    //   const concertResults = await Promise.all(concertPromises);
+    //   setTicketConcerts(concertResults.filter((c) => c !== null));
+    // } catch (err) {
+    //   console.error("Error fetching tickets:", err);
+    //   setTickets([]);
+    //   setTicketConcerts([]);
+    // }
   };
 
   const fetchCustomerBalance = async () => {
-    try {
-      if (!principal) {
-        console.error("Principal is not defined");
-        return;
-      }
-      const bal = await actor.getCustomerBalance(principal);
-      setBalance(Number(bal) / 100_000_000);
-    } catch (error) {
-      console.error("Failed to fetch customer balance:", error);
-      setBalance(0);
-    }
+    setBalance(200);
+    // try {
+    //   if (!principal) {
+    //     console.error("Principal is not defined");
+    //     return;
+    //   }
+    //   const bal = await actor.getCustomerBalance(principal);
+    //   setBalance(Number(bal) / 100_000_000);
+    // } catch (error) {
+    //   console.error("Failed to fetch customer balance:", error);
+    //   setBalance(0);
+    // }
   };
 
   return (
@@ -343,7 +455,7 @@ function App() {
           <h2 className="text-2xl font-bold mb-6 text-gray-800">
             All Concerts
           </h2>
-          {!tokenInitialized ? (
+          {tokenInitialized ? (
             <div>
               <p className="text-gray-600">
                 The token has not been initialized yet. Please wait for an

@@ -28,24 +28,50 @@ export default function OrganizerDashboard({ actor, logout, principal, refetchCo
     }
   };
 
+  const dummyConcerts = [
+    {
+      id: 3,
+      name: "Pop & Rock Carnival",
+      date: (
+        new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).getTime() * 1000000
+      ).toString(),
+      organizerId: 3,
+      price: 2,
+      soldTickets: 90,
+      totalTickets: 100,
+    },
+    {
+      id: 5,
+      name: "Indie Vibes Showcase",
+      date: (
+        new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).getTime() * 1000000
+      ).toString(),
+      organizerId: 3,
+      price: 3,
+      soldTickets: 10,
+      totalTickets: 230,
+    },
+  ];
+
   const fetchConcerts = async () => {
-    try {
-      if (!principal) {
-        console.error("Principal is not defined");
-        return;
-      }
-      const concertIds = await actor.getOrganizerConcerts(principal);
-      const concertPromises = concertIds.map(async (id) => {
-        const [concert, found] = await actor.getConcert(id);
-        return found ? concert : null;
-      });
-      const concertResults = await Promise.all(concertPromises);
-      setConcerts(concertResults.filter((c) => c !== null));
-    } catch (error) {
-      console.error("Failed to fetch concerts:", error);
-      setConcerts([]);
-    }
-    refetchConcerts();
+    setConcerts(dummyConcerts);
+    // try {
+    //   if (!principal) {
+    //     console.error("Principal is not defined");
+    //     return;
+    //   }
+    //   const concertIds = await actor.getOrganizerConcerts(principal);
+    //   const concertPromises = concertIds.map(async (id) => {
+    //     const [concert, found] = await actor.getConcert(id);
+    //     return found ? concert : null;
+    //   });
+    //   const concertResults = await Promise.all(concertPromises);
+    //   setConcerts(concertResults.filter((c) => c !== null));
+    // } catch (error) {
+    //   console.error("Failed to fetch concerts:", error);
+    //   setConcerts([]);
+    // }
+    // refetchConcerts();
   };
 
   const fetchOrganizerData = async () => {
@@ -66,13 +92,23 @@ export default function OrganizerDashboard({ actor, logout, principal, refetchCo
   };
 
   const handleCreateConcert = async (name, date, totalTickets, price) => {
-    try {
-      await actor.createConcert(name, date, totalTickets, price);
-      fetchConcerts();
-      fetchOrganizerData();
-    } catch (error) {
-      alert(`Failed to create concert: ${error.message}`);
-    }
+    dummyConcerts.push({
+      id: dummyConcerts.length + 1,
+      name,
+      date,
+      organizerId: 3,
+      price: Number(price),
+      totalTickets: Number(totalTickets),
+      soldTickets: 0,
+    })
+    setConcerts([...dummyConcerts]);
+    // try {
+    //   await actor.createConcert(name, date, totalTickets, price);
+    //   fetchConcerts();
+    //   fetchOrganizerData();
+    // } catch (error) {
+    //   alert(`Failed to create concert: ${error.message}`);
+    // }
   };
 
   const handleInitializeToken = async (tokenData) => {
@@ -144,7 +180,7 @@ export default function OrganizerDashboard({ actor, logout, principal, refetchCo
         <p className="text-gray-600">Balance: {balance}</p>
         <p className="text-gray-600">Revenue: {revenue}</p>
       </div>
-      {!tokenInitialized ? (
+      {tokenInitialized ? (
         <div>
           <h2 className="text-2xl font-bold mb-6 text-gray-800">Token Not Initialized</h2>
           <p className="text-gray-600 mb-4">You need to initialize the token before proceeding. Please provide the token details below.</p>

@@ -26,7 +26,7 @@ export default function ConcertDetailsModal({ concert, onClose, role, onBuyTicke
           <p className="text-gray-600 text-sm"><span className="font-medium">Total Tickets:</span> {totalTickets}</p>
           <p className="text-gray-600 text-sm"><span className="font-medium">Tickets Sold:</span> {soldTickets}</p>
           <p className="text-gray-600 text-sm"><span className="font-medium">Price:</span> {price}</p>
-          <p className="text-gray-600 text-sm"><span className="font-medium">Organizer ID:</span> {concert.organizerId.toText()}</p>
+          <p className="text-gray-600 text-sm"><span className="font-medium">Organizer ID:</span> {concert.organizerId}</p>
         </div>
         <div className="mt-4 flex space-x-2">
           {role === "Customer" && soldTickets < totalTickets && !isPastOrToday && (
